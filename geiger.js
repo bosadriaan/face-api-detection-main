@@ -1,13 +1,10 @@
 const video = document.getElementById("video");
 let isDetectionRunning = false;
 let isMuted = false;
-
+let totalDetections = 0;
 const toggleButton = document.getElementById("toggleButton");
-
 const MODEL_URI = "/models";
 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-
-let totalDetections = 0;
 
 function playTick() {
   if (isMuted) {
