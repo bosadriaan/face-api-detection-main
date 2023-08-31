@@ -8,21 +8,7 @@ const MODEL_URI = "/models";
 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
 const supportsVibration = "vibrate" in navigator;
 
-      if (supportsVibration) {
-        navigator.vibrate(50); // Vibrate for 200 milliseconds
-      }
 
-function playTick() {
-  if (isMuted) {
-    return; // Exit the function if muted.
-  }
-  const oscillator = audioContext.createOscillator();
-  oscillator.type = "square"; // square wave
-  oscillator.frequency.setValueAtTime(440, audioContext.currentTime); // value in hertz
-  oscillator.connect(audioContext.destination);
-  oscillator.start();
-  oscillator.stop(audioContext.currentTime + 0.05); // stops the sound after 50ms
-}
 
 Promise.all([
   faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URI),
@@ -77,6 +63,9 @@ toggleButton.addEventListener("click", function () {
   } else {
     // If the detection is not running, start it.
     startDetection();
+    if (supportsVibration) {
+        navigator.vibrate(50); // Vibrate for 200 milliseconds
+      }
     this.textContent = "Stop";
   }
   isDetectionRunning = !isDetectionRunning; // Toggle the flag.
@@ -85,7 +74,10 @@ toggleButton.addEventListener("click", function () {
 function startDetection() {
   detectionInterval = setInterval(async () => {
     const detections = await faceapi
-      .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
+      .detectAllFaces(
+        video,
+        new faceapi.TinyFaceDetectorOptions({ scoreThreshold: 0.2 })
+      )
       .withFaceLandmarks();
 
     const redCircle = document.getElementById("redCircle");
@@ -105,14 +97,29 @@ function startDetection() {
       totalDetections += counter;
       document.getElementById("faceCount").textContent = counter;
       document.getElementById("detectionCount").textContent = totalDetections;
-      playTick();
-    //   if (supportsVibration) {
-    //     navigator.vibrate(50); // Vibrate for 200 milliseconds
-    //   }
+      playTick(counter);
+      //   if (supportsVibration) {
+      //     navigator.vibrate(50); // Vibrate for 200 milliseconds
+      //   }
 
       // Flash the red circle
       redCircle.classList.add("active-flash");
       setTimeout(() => redCircle.classList.remove("active-flash"), 50); // Remove the class after the animation's duration.
     }
-  }, 250);
+  }, 400);
+}
+
+function playTick(counter) {
+  if (isMuted) {
+    return; // Exit the function if muted.
+  }
+  const oscillator = audioContext.createOscillator();
+  oscillator.type = "square"; // square wave
+  oscillator.frequency.setValueAtTime(
+    440 + counter * 30,
+    audioContext.currentTime
+  ); // value in hertz
+  oscillator.connect(audioContext.destination);
+  oscillator.start();
+  oscillator.stop(audioContext.currentTime + 0.04); // stops the sound after 50ms
 }
