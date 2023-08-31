@@ -1,0 +1,35 @@
+
+.red-circle {
+    width: 30px;
+    height: 30px;
+    background-color: rgb(255, 60, 0);
+    border-radius: 50%;
+    opacity: 0.2; /* Set initial opacity */
+  }
+
+  .active-flash {
+    animation: flash 0.05s alternate;
+    opacity: 1; /* Fully visible */
+  }
+  
+  @keyframes flash {
+    from {
+      opacity: 0.1;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  
+  
+  .counters p {
+    margin: 10px 0;
+    font-size: 20px;
+  }
+  
+  button {
+    padding: 10px 20px;
+    margin: 10px;
+    font-size: 16px;
+  }
+  

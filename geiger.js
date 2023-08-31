@@ -1,16 +1,25 @@
 const video = document.getElementById("video");
+let isDetectionRunning = false;
+let isMuted = false;
+
+const toggleButton = document.getElementById("toggleButton");
+
 const MODEL_URI = "/models";
 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
-function playTick() {
-    const oscillator = audioContext.createOscillator();
-    oscillator.type = 'square';  // square wave
-    oscillator.frequency.setValueAtTime(440, audioContext.currentTime); // value in hertz
-    oscillator.connect(audioContext.destination);
-    oscillator.start();
-    oscillator.stop(audioContext.currentTime + 0.05);  // stops the sound after 50ms
-}
+let totalDetections = 0;
 
+function playTick() {
+  if (isMuted) {
+    return; // Exit the function if muted.
+  }
+  const oscillator = audioContext.createOscillator();
+  oscillator.type = "square"; // square wave
+  oscillator.frequency.setValueAtTime(440, audioContext.currentTime); // value in hertz
+  oscillator.connect(audioContext.destination);
+  oscillator.start();
+  oscillator.stop(audioContext.currentTime + 0.05); // stops the sound after 50ms
+}
 
 Promise.all([
   faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URI),
@@ -42,12 +51,34 @@ function playVideo() {
     });
 }
 
-video.addEventListener("play", () => {
-  setInterval(async () => {
+let detectionInterval; // Declare this at the top of the script.
+
+// Handle the mute button
+document.getElementById("muteButton").addEventListener("click", function () {
+  isMuted = !isMuted; // Toggle the mute state
+  this.textContent = isMuted ? "Unmute" : "Mute";
+});
+
+toggleButton.addEventListener("click", function () {
+  if (isDetectionRunning) {
+    // If the detection is running, stop it.
+    clearInterval(detectionInterval);
+    this.textContent = "Start";
+  } else {
+    // If the detection is not running, start it.
+    startDetection();
+    this.textContent = "Stop";
+  }
+  isDetectionRunning = !isDetectionRunning; // Toggle the flag.
+});
+
+function startDetection() {
+  detectionInterval = setInterval(async () => {
     const detections = await faceapi
-      .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions({ scoreThreshold: 0.5 }))
+      .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
       .withFaceLandmarks();
 
+    const redCircle = document.getElementById("redCircle");
     let counter = 0;
     for (let detection of detections) {
       const landmarks = detection.landmarks;
@@ -61,8 +92,14 @@ video.addEventListener("play", () => {
     }
 
     if (counter > 0) {
-      console.log(`${counter} people are likely looking at the camera!`);
+      totalDetections += counter;
+      document.getElementById("faceCount").textContent = counter;
+      document.getElementById("detectionCount").textContent = totalDetections;
       playTick();
+
+      // Flash the red circle
+      redCircle.classList.add("active-flash");
+      setTimeout(() => redCircle.classList.remove("active-flash"), 50); // Remove the class after the animation's duration.
     }
   }, 200);
-});
+}
