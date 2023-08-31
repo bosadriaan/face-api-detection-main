@@ -6,6 +6,7 @@ let totalDetections = 0;
 const toggleButton = document.getElementById("toggleButton");
 const MODEL_URI = "/models";
 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+const supportsVibration = "vibrate" in navigator;
 
 function playTick() {
   if (isMuted) {
@@ -38,7 +39,7 @@ function playVideo() {
       video: {
         width: { min: 640, ideal: 1280, max: 1920 },
         height: { min: 360, ideal: 720, max: 1080 },
-        facingMode: 'environment'
+        facingMode: "environment",
       },
       audio: false,
     })
@@ -51,7 +52,7 @@ function playVideo() {
           .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
           .withFaceLandmarks();
         console.log("Warm-up detection completed.");
-      }, 200); 
+      }, 200);
     })
     .catch(function (err) {
       console.log(err);
@@ -101,6 +102,9 @@ function startDetection() {
       document.getElementById("faceCount").textContent = counter;
       document.getElementById("detectionCount").textContent = totalDetections;
       playTick();
+      if (supportsVibration) {
+        navigator.vibrate(200); // Vibrate for 200 milliseconds
+      }
 
       // Flash the red circle
       redCircle.classList.add("active-flash");
