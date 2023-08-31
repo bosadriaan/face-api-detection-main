@@ -103,7 +103,7 @@ function startDetection() {
       document.getElementById("detectionCount").textContent = totalDetections;
       playTick();
       if (supportsVibration) {
-        navigator.vibrate(200); // Vibrate for 200 milliseconds
+        navigator.vibrate(50); // Vibrate for 200 milliseconds
       }
 
       // Flash the red circle
