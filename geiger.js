@@ -8,6 +8,10 @@ const MODEL_URI = "/models";
 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
 const supportsVibration = "vibrate" in navigator;
 
+      if (supportsVibration) {
+        navigator.vibrate(50); // Vibrate for 200 milliseconds
+      }
+
 function playTick() {
   if (isMuted) {
     return; // Exit the function if muted.
@@ -102,9 +106,9 @@ function startDetection() {
       document.getElementById("faceCount").textContent = counter;
       document.getElementById("detectionCount").textContent = totalDetections;
       playTick();
-      if (supportsVibration) {
-        navigator.vibrate(50); // Vibrate for 200 milliseconds
-      }
+    //   if (supportsVibration) {
+    //     navigator.vibrate(50); // Vibrate for 200 milliseconds
+    //   }
 
       // Flash the red circle
       redCircle.classList.add("active-flash");
