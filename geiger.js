@@ -106,7 +106,7 @@ function startDetection() {
       redCircle.classList.add("active-flash");
       setTimeout(() => redCircle.classList.remove("active-flash"), 50); // Remove the class after the animation's duration.
     }
-  }, 400);
+  }, 250);
 }
 
 function playTick(counter) {
@@ -116,7 +116,7 @@ function playTick(counter) {
   const oscillator = audioContext.createOscillator();
   oscillator.type = "square"; // square wave
   oscillator.frequency.setValueAtTime(
-    440 + counter * 30,
+    440 + counter * 20,
     audioContext.currentTime
   ); // value in hertz
   oscillator.connect(audioContext.destination);
