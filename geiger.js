@@ -114,5 +114,5 @@ function startDetection() {
       redCircle.classList.add("active-flash");
       setTimeout(() => redCircle.classList.remove("active-flash"), 50); // Remove the class after the animation's duration.
     }
-  }, 500);
+  }, 250);
 }
