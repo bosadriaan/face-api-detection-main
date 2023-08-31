@@ -1,6 +1,7 @@
 const video = document.getElementById("video");
 let isDetectionRunning = false;
 let isMuted = false;
+let detectionInterval;
 let totalDetections = 0;
 const toggleButton = document.getElementById("toggleButton");
 const MODEL_URI = "/models";
@@ -42,13 +43,19 @@ function playVideo() {
     })
     .then(function (stream) {
       video.srcObject = stream;
+
+      // Warm-up the detector after a slight delay to ensure we have video frames
+      setTimeout(async () => {
+        await faceapi
+          .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
+          .withFaceLandmarks();
+        console.log("Warm-up detection completed.");
+      }, 200); 
     })
     .catch(function (err) {
       console.log(err);
     });
 }
-
-let detectionInterval; // Declare this at the top of the script.
 
 // Handle the mute button
 document.getElementById("muteButton").addEventListener("click", function () {
