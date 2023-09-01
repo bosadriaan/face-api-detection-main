@@ -9,7 +9,7 @@ const MODEL_URI = "/models";
 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
 const supportsVibration = "vibrate" in navigator;
 
-let tightnessFactor = 0.3;
+let tightnessFactor = 0.8;
 document.getElementById('accuracySlider').value = tightnessFactor;
 document.getElementById('sliderValue').textContent = tightnessFactor.toFixed(2);
 
@@ -20,7 +20,8 @@ document.getElementById('accuracySlider').addEventListener('input', function(eve
 
 Promise.all([
   faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URI),
-  faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URI),
+  // faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URI),
+  faceapi.nets.faceLandmark68TinyNet.loadFromUri(MODEL_URI),
 ])
   .then(playVideo)
   .catch((err) => {
@@ -48,8 +49,9 @@ function playVideo() {
       // Warm-up the detector after a slight delay to ensure we have video frames
       setTimeout(async () => {
         await faceapi
-          .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
-          .withFaceLandmarks();
+        .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
+          // .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
+          .withFaceLandmarks(true); // true means use TinyModel
         console.log("Warm-up detection completed.");
       }, 200);
     })
@@ -86,8 +88,9 @@ function processFrame() {
   console.log('Processing Frame..')
   // Start asynchronous face detection for the current frame
   faceapi
-      .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions({ scoreThreshold: 0.2 }))
-      .withFaceLandmarks()
+      .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions({ scoreThreshold: 0.2, inputSize: 800 }))
+      // .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ scoreThreshold: 0.2 }))
+      .withFaceLandmarks(true)
       .then(detections => {
           let counterf = 0;
           let counter = 0;
@@ -127,7 +130,7 @@ function processFrame() {
           // Schedule next frame processing
           console.log(isDetectionRunning)
           if (isDetectionRunning) {
-              setTimeout(processFrame, 0);
+              setTimeout(processFrame, 350);
           }
       })
       .catch(err => {
