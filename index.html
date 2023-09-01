@@ -7,23 +7,42 @@
     <title>Face-API AI Real-Time Facial Detection</title>
     <link rel="stylesheet" type="text/css" href="styles.css" />
     <script defer src="face-api.min.js"></script>
-    <script defer src="geiger.js"></script>
+    <script defer src="geiger2.js"></script>
   </head>
 
   <body>
     <main class="container">
-      <h1>Stare Teller</h1>
+      <h1>Stare Teller B</h1>
       <p>V0.06</p>
       <div id="video-container" class="video-container">
         <video id="video" autoplay muted width="200" height="200"></video>
 
         <div id="redCircle" class="red-circle"></div>
         <div class="counters">
-          <p><span id="faceCount">0</span> out of <span id="faceCountf">0</span> people staring!</p>
-          <p><span id="detectionCount">0</span> stares out of <span id="detectionCountf">0</span> total.</p>
+          <p>
+            <span id="faceCount">0</span> out of
+            <span id="faceCountf">0</span> people staring!
+          </p>
+          <p>
+            <span id="detectionCount">0</span> stares out of
+            <span id="detectionCountf">0</span> total.
+          </p>
         </div>
         <button id="muteButton">Mute</button>
         <button id="toggleButton">Start</button>
+        <div>
+          <!-- The range slider -->
+          <input
+            type="range"
+            id="accuracySlider"
+            min="0"
+            max="1"
+            step="0.01"
+            value="1"
+          />
+          <!-- A label to display the current value -->
+          <div>Tolerance: <span id="sliderValue">1</span></div>
+        </div>
       </div>
     </main>
   </body>

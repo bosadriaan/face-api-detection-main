@@ -9,6 +9,15 @@ const MODEL_URI = "/models";
 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
 const supportsVibration = "vibrate" in navigator;
 
+let tightnessFactor = 0.3;
+document.getElementById('accuracySlider').value = tightnessFactor;
+document.getElementById('sliderValue').textContent = tightnessFactor.toFixed(2);
+
+document.getElementById('accuracySlider').addEventListener('input', function(event) {
+  tightnessFactor = parseFloat(event.target.value);
+  document.getElementById('sliderValue').textContent = tightnessFactor.toFixed(2);  // Displaying the value to 2 decimal places
+});
+
 Promise.all([
   faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URI),
   faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URI),
@@ -29,7 +38,7 @@ function playVideo() {
         width: { min: 640, ideal: 1280, max: 1920 },
         height: { min: 360, ideal: 720, max: 1080 },
         facingMode: "environment",
-        advanced: [{ zoom: 2 }],
+        advanced: [{ zoom: 1.5 }],
       },
       audio: false,
     })
@@ -56,68 +65,82 @@ document.getElementById("muteButton").addEventListener("click", function () {
 });
 
 toggleButton.addEventListener("click", function () {
+  // Toggle the flag at the start
+  isDetectionRunning = !isDetectionRunning;
+  
   if (isDetectionRunning) {
-    // If the detection is running, stop it.
-    clearInterval(detectionInterval);
-    this.textContent = "Start";
-  } else {
-    // If the detection is not running, start it.
+    // If the detection is now running, start it.
     startDetection();
     if (supportsVibration) {
       navigator.vibrate(50); // Vibrate for 200 milliseconds
     }
     this.textContent = "Stop";
+  } else {
+    // If the detection has been stopped, reflect that.
+    this.textContent = "Start";
   }
-  isDetectionRunning = !isDetectionRunning; // Toggle the flag.
 });
 
-function startDetection() {
-  detectionInterval = setInterval(async () => {
-    const detections = await faceapi
-      .detectAllFaces(
-        video,
-        new faceapi.TinyFaceDetectorOptions({ scoreThreshold: 0.2 })
-      )
-      .withFaceLandmarks();
 
-    const redCircle = document.getElementById("redCircle");
-    let counterf = 0;
-    let counter = 0;
-    for (let detection of detections) {
-      const landmarks = detection.landmarks;
-      const noseTip = landmarks.getNose()[2];
-      const leftEye = landmarks.getLeftEye()[0];
-      const rightEye = landmarks.getRightEye()[3];
-      counterf++;
-      let tightnessFactor = 0.3; // 1 (nosetip between the eyes) to 0 (exactly in the middle)
-      const middlePoint = leftEye.x + (rightEye.x - leftEye.x) / 2;
-      const allowedDeviation = ((rightEye.x - leftEye.x) / 2) * tightnessFactor;
-      if (
-        noseTip.x > middlePoint - allowedDeviation &&
-        noseTip.x < middlePoint + allowedDeviation
-      ) {
-        counter++;
-      }
-    }
-    totalDetections += counter;
-    totalDetectionsf += counterf;
-    document.getElementById("faceCountf").textContent = counterf;
-    document.getElementById("faceCount").textContent = counter;
-    document.getElementById("detectionCountf").textContent = totalDetectionsf;
-    document.getElementById("detectionCount").textContent = totalDetections;
-    if (counter > 0) {
+function processFrame() {
+  console.log('Processing Frame..')
+  // Start asynchronous face detection for the current frame
+  faceapi
+      .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions({ scoreThreshold: 0.2 }))
+      .withFaceLandmarks()
+      .then(detections => {
+          let counterf = 0;
+          let counter = 0;
+          for (let detection of detections) {
+              const landmarks = detection.landmarks;
+              const noseTip = landmarks.getNose()[2];
+              const leftEye = landmarks.getLeftEye()[0];
+              const rightEye = landmarks.getRightEye()[3];
+              counterf++;
+              // let tightnessFactor = 0.3;
+              const middlePoint = leftEye.x + (rightEye.x - leftEye.x) / 2;
+              const allowedDeviation = ((rightEye.x - leftEye.x) / 2) * tightnessFactor;
+              if (
+                  noseTip.x > middlePoint - allowedDeviation &&
+                  noseTip.x < middlePoint + allowedDeviation
+              ) {
+                  counter++;
+              }
+          }
+          totalDetections += counter;
+          totalDetectionsf += counterf;
+          document.getElementById("faceCountf").textContent = counterf;
+          document.getElementById("faceCount").textContent = counter;
+          document.getElementById("detectionCountf").textContent = totalDetectionsf;
+          document.getElementById("detectionCount").textContent = totalDetections;
+          if (counter > 0) {
+              playTick(counter);
+              if (supportsVibration) {
+                  navigator.vibrate([50, 20]);
+              }
 
-      playTick(counter);
-        if (supportsVibration) {
-          navigator.vibrate([50, 20]); // Vibrate for 200 milliseconds
-        }
+              const redCircle = document.getElementById("redCircle");
+              redCircle.classList.add("active-flash");
+              setTimeout(() => redCircle.classList.remove("active-flash"), 50);
+          }
 
-
-      redCircle.classList.add("active-flash");
-      setTimeout(() => redCircle.classList.remove("active-flash"), 50); // Remove the class after the animation's duration.
-    }
-  }, 350);
+          // Schedule next frame processing
+          console.log(isDetectionRunning)
+          if (isDetectionRunning) {
+              setTimeout(processFrame, 0);
+          }
+      })
+      .catch(err => {
+          console.error("Error processing frame:", err);
+      });
 }
+
+// Modify the startDetection function to initiate the recursive mechanism
+function startDetection() {
+  isDetectionRunning = true;
+  processFrame();
+}
+
 
 function playTick(beepCount) {
   if (isMuted) {
