@@ -28,7 +28,7 @@ function playVideo() {
         width: { min: 640, ideal: 1280, max: 1920 },
         height: { min: 360, ideal: 720, max: 1080 },
         facingMode: "environment",
-        advanced: [{ zoom: 1.3 }],
+        advanced: [{ zoom: 1 }],
       },
       audio: false,
     })
