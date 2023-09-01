@@ -106,7 +106,7 @@ function startDetection() {
 
       playTick(counter);
         if (supportsVibration) {
-          navigator.vibrate(50); // Vibrate for 200 milliseconds
+          navigator.vibrate([50, 20]); // Vibrate for 200 milliseconds
         }
 
 
