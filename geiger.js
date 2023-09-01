@@ -105,9 +105,9 @@ function startDetection() {
     if (counter > 0) {
 
       playTick(counter);
-      //   if (supportsVibration) {
-      //     navigator.vibrate(50); // Vibrate for 200 milliseconds
-      //   }
+        if (supportsVibration) {
+          navigator.vibrate(50); // Vibrate for 200 milliseconds
+        }
 
 
       redCircle.classList.add("active-flash");
