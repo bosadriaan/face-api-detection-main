@@ -56,22 +56,25 @@ document.getElementById("muteButton").addEventListener("click", function () {
 });
 
 toggleButton.addEventListener("click", function () {
+  // Toggle the flag at the start
+  isDetectionRunning = !isDetectionRunning;
+  
   if (isDetectionRunning) {
-    // If the detection is running, stop it.
-    clearInterval(detectionInterval);
-    this.textContent = "Start";
-  } else {
-    // If the detection is not running, start it.
+    // If the detection is now running, start it.
     startDetection();
     if (supportsVibration) {
       navigator.vibrate(50); // Vibrate for 200 milliseconds
     }
     this.textContent = "Stop";
+  } else {
+    // If the detection has been stopped, reflect that.
+    this.textContent = "Start";
   }
-  isDetectionRunning = !isDetectionRunning; // Toggle the flag.
 });
 
+
 function processFrame() {
+  console.log('Processing Frame..')
   // Start asynchronous face detection for the current frame
   faceapi
       .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions({ scoreThreshold: 0.2 }))
@@ -113,6 +116,7 @@ function processFrame() {
           }
 
           // Schedule next frame processing
+          console.log(isDetectionRunning)
           if (isDetectionRunning) {
               setTimeout(processFrame, 0);
           }
