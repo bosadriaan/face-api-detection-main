@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Face-API AI Real-Time Facial Detection</title>
+    <link rel="stylesheet" type="text/css" href="styles.css" />
+    <script defer src="face-api.min.js"></script>
+    <script defer src="geiger2.js"></script>
+  </head>
+
+  <body>
+    <main class="container">
+      <h1>Stare Teller</h1>
+      <p>V0.06</p>
+      <div id="video-container" class="video-container">
+        <video id="video" autoplay muted width="200" height="200"></video>
+
+        <div id="redCircle" class="red-circle"></div>
+        <div class="counters">
+          <p><span id="faceCount">0</span> out of <span id="faceCountf">0</span> people staring!</p>
+          <p><span id="detectionCount">0</span> stares out of <span id="detectionCountf">0</span> total.</p>
+        </div>
+        <button id="muteButton">Mute</button>
+        <button id="toggleButton">Start</button>
+      </div>
+    </main>
+  </body>
+</html>
