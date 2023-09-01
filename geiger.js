@@ -109,7 +109,7 @@ function startDetection() {
   }, 250);
 }
 
-function playTick(counter) {
+function playTickx(counter) {
   if (isMuted) {
     return; // Exit the function if muted.
   }
@@ -121,5 +121,22 @@ function playTick(counter) {
   ); // value in hertz
   oscillator.connect(audioContext.destination);
   oscillator.start();
-  oscillator.stop(audioContext.currentTime + 0.04); // stops the sound after 50ms
+  oscillator.stop(audioContext.currentTime + 0.08); 
 }
+
+
+async function playTick(beepCount) {
+    for (let i = 0; i < beepCount; i++) {
+      const oscillator = audioContext.createOscillator();
+      oscillator.type = "square";
+      oscillator.frequency.setValueAtTime(440, audioContext.currentTime);
+      oscillator.connect(audioContext.destination);
+      oscillator.start();
+      oscillator.stop(audioContext.currentTime + 0.04);
+      
+      if (i < beepCount - 1) {
+        // If there are more beeps to play, wait a bit before the next one
+        await new Promise(resolve => setTimeout(resolve, 80));
+      }
+    }
+  }
