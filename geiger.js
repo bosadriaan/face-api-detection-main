@@ -8,8 +8,6 @@ const MODEL_URI = "/models";
 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
 const supportsVibration = "vibrate" in navigator;
 
-
-
 Promise.all([
   faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URI),
   faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URI),
@@ -30,6 +28,7 @@ function playVideo() {
         width: { min: 640, ideal: 1280, max: 1920 },
         height: { min: 360, ideal: 720, max: 1080 },
         facingMode: "environment",
+        advanced: [{ zoom: 1.3 }],
       },
       audio: false,
     })
@@ -64,8 +63,8 @@ toggleButton.addEventListener("click", function () {
     // If the detection is not running, start it.
     startDetection();
     if (supportsVibration) {
-        navigator.vibrate(50); // Vibrate for 200 milliseconds
-      }
+      navigator.vibrate(50); // Vibrate for 200 milliseconds
+    }
     this.textContent = "Stop";
   }
   isDetectionRunning = !isDetectionRunning; // Toggle the flag.
@@ -81,60 +80,54 @@ function startDetection() {
       .withFaceLandmarks();
 
     const redCircle = document.getElementById("redCircle");
+    let counterf = 0;
     let counter = 0;
     for (let detection of detections) {
       const landmarks = detection.landmarks;
       const noseTip = landmarks.getNose()[2];
       const leftEye = landmarks.getLeftEye()[0];
       const rightEye = landmarks.getRightEye()[3];
-
-      if (noseTip.x > leftEye.x && noseTip.x < rightEye.x) {
+      counterf++;
+      let tightnessFactor = 0.3; // 1 (nosetip between the eyes) to 0 (exactly in the middle)
+      const middlePoint = leftEye.x + (rightEye.x - leftEye.x) / 2;
+      const allowedDeviation = ((rightEye.x - leftEye.x) / 2) * tightnessFactor;
+      if (
+        noseTip.x > middlePoint - allowedDeviation &&
+        noseTip.x < middlePoint + allowedDeviation
+      ) {
         counter++;
       }
     }
-
+    totalDetections += counter;
+    document.getElementById("faceCountf").textContent = counterf;
+    document.getElementById("faceCount").textContent = counter;
+    document.getElementById("detectionCount").textContent = totalDetections;
     if (counter > 0) {
-      totalDetections += counter;
-      document.getElementById("faceCount").textContent = counter;
-      document.getElementById("detectionCount").textContent = totalDetections;
+
       playTick(counter);
       //   if (supportsVibration) {
       //     navigator.vibrate(50); // Vibrate for 200 milliseconds
       //   }
 
-      // Flash the red circle
+
       redCircle.classList.add("active-flash");
       setTimeout(() => redCircle.classList.remove("active-flash"), 50); // Remove the class after the animation's duration.
     }
   }, 350);
 }
 
-function playTickx(counter) {
+function playTick(beepCount) {
   if (isMuted) {
     return; // Exit the function if muted.
   }
-  const oscillator = audioContext.createOscillator();
-  oscillator.type = "square"; // square wave
-  oscillator.frequency.setValueAtTime(
-    440 + counter * 20,
-    audioContext.currentTime
-  ); // value in hertz
-  oscillator.connect(audioContext.destination);
-  oscillator.start();
-  oscillator.stop(audioContext.currentTime + 0.08); 
-}
-
-
-function playTick(beepCount) {
-    for (let i = 0; i < beepCount; i++) {
-        // Schedule the beep
-        setTimeout(() => {
-            const oscillator = audioContext.createOscillator();
-            oscillator.type = "square";
-            oscillator.frequency.setValueAtTime(440, audioContext.currentTime);
-            oscillator.connect(audioContext.destination);
-            oscillator.start();
-            oscillator.stop(audioContext.currentTime + 0.04);
-        }, i * 80); // This will ensure beeps are spaced by 80ms
-    }
+  for (let i = 0; i < beepCount; i++) {
+    setTimeout(() => {
+      const oscillator = audioContext.createOscillator();
+      oscillator.type = "square";
+      oscillator.frequency.setValueAtTime(440, audioContext.currentTime);
+      oscillator.connect(audioContext.destination);
+      oscillator.start();
+      oscillator.stop(audioContext.currentTime + 0.05);
+    }, i * 80);
+  }
 }
