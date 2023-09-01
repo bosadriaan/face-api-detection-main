@@ -3,6 +3,7 @@ let isDetectionRunning = false;
 let isMuted = false;
 let detectionInterval;
 let totalDetections = 0;
+let totalDetectionsf = 0;
 const toggleButton = document.getElementById("toggleButton");
 const MODEL_URI = "/models";
 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -99,8 +100,10 @@ function startDetection() {
       }
     }
     totalDetections += counter;
+    totalDetectionsf += counterf;
     document.getElementById("faceCountf").textContent = counterf;
     document.getElementById("faceCount").textContent = counter;
+    document.getElementById("detectionCountf").textContent = totalDetectionsf;
     document.getElementById("detectionCount").textContent = totalDetections;
     if (counter > 0) {
 
