@@ -5,6 +5,7 @@ let detectionInterval;
 let totalDetections = 0;
 let totalDetectionsf = 0;
 const toggleButton = document.getElementById("toggleButton");
+toggleButton.textContent = "Loading..";
 const MODEL_URI = "/models";
 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
 const supportsVibration = "vibrate" in navigator;
@@ -53,6 +54,7 @@ function playVideo() {
           // .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
           .withFaceLandmarks(true); // true means use TinyModel
         console.log("Warm-up detection completed.");
+        toggleButton.textContent = "Start";
       }, 200);
     })
     .catch(function (err) {
