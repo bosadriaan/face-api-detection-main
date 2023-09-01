@@ -106,7 +106,7 @@ function startDetection() {
       redCircle.classList.add("active-flash");
       setTimeout(() => redCircle.classList.remove("active-flash"), 50); // Remove the class after the animation's duration.
     }
-  }, 250);
+  }, 350);
 }
 
 function playTickx(counter) {
@@ -125,18 +125,16 @@ function playTickx(counter) {
 }
 
 
-async function playTick(beepCount) {
+function playTick(beepCount) {
     for (let i = 0; i < beepCount; i++) {
-      const oscillator = audioContext.createOscillator();
-      oscillator.type = "square";
-      oscillator.frequency.setValueAtTime(440, audioContext.currentTime);
-      oscillator.connect(audioContext.destination);
-      oscillator.start();
-      oscillator.stop(audioContext.currentTime + 0.04);
-      
-      if (i < beepCount - 1) {
-        // If there are more beeps to play, wait a bit before the next one
-        await new Promise(resolve => setTimeout(resolve, 80));
-      }
+        // Schedule the beep
+        setTimeout(() => {
+            const oscillator = audioContext.createOscillator();
+            oscillator.type = "square";
+            oscillator.frequency.setValueAtTime(440, audioContext.currentTime);
+            oscillator.connect(audioContext.destination);
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 0.04);
+        }, i * 80); // This will ensure beeps are spaced by 80ms
     }
-  }
+}
